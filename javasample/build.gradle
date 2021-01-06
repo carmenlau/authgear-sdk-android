@@ -36,6 +36,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    signingConfigs {
+        debug {
+            // keyAlias ''
+            // keyPassword ''
+            // storeFile file('')
+            // storePassword ''
+        }
+    }
 }
 
 dependencies {
@@ -46,6 +54,7 @@ dependencies {
     implementation 'androidx.activity:activity:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.5'
     // To add Authgear in your app, use the following for latest version in main branch
     // implementation 'com.github.authgear:authgear-sdk-android:main-SNAPSHOT'
     implementation project(':sdk')

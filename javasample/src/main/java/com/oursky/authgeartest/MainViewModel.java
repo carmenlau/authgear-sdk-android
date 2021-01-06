@@ -26,11 +26,15 @@ import com.oursky.authgear.PromoteOptions;
 import com.oursky.authgear.SessionState;
 import com.oursky.authgear.SessionStateChangeReason;
 import com.oursky.authgear.UserInfo;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 @SuppressWarnings("ConstantConditions")
 public class MainViewModel extends AndroidViewModel implements AuthgearDelegate {
     private static final String TAG = MainViewModel.class.getSimpleName();
     private Authgear mAuthgear = null;
+    private IWXAPI weChatAPI;
     final private MutableLiveData<Boolean> mIsConfigured = new MutableLiveData<>(false);
     final private MutableLiveData<String> mClientID = new MutableLiveData<>("");
     final private MutableLiveData<String> mEndpoint = new MutableLiveData<>("");
@@ -136,6 +140,11 @@ public class MainViewModel extends AndroidViewModel implements AuthgearDelegate 
 
         initializeScreenState();
         mIsConfigured.setValue(true);
+
+        // 通过WXAPIFactory工厂，获取IWXAPI的实例
+        weChatAPI = WXAPIFactory.createWXAPI(app, MainApplication.WECHAT_APP_ID, true);
+        // 将应用的appId注册到微信
+        weChatAPI.registerApp(MainApplication.WECHAT_APP_ID);
     }
 
     public void authorize() {
@@ -244,5 +253,18 @@ public class MainViewModel extends AndroidViewModel implements AuthgearDelegate 
     public void onSessionStateChanged(Authgear container, SessionStateChangeReason reason) {
         Log.d(TAG, "Session state=" + container.getSessionState() + " reason=" + reason);
         updateSessionState();
+    }
+
+    @Override
+    public void sendWeChatAuthRequest(String state) {
+        Log.d(TAG, "sendWeChatAuthRequest=" + state);
+        if (!weChatAPI.isWXAppInstalled()) {
+            mError.setValue(new RuntimeException("您还未安装微信客户端"));
+        }
+
+        SendAuth.Req req = new SendAuth.Req();
+        req.scope = "snsapi_userinfo";
+        req.state = state;
+        weChatAPI.sendReq(req);
     }
 }
